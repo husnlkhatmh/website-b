@@ -1,47 +1,49 @@
-const express = require('express')
-const app = express()
+const express = require("express");
+const app = express();
 
-var cors = require('cors')
-var bodyParser = require('body-parser')
+var bodyParser = require("body-parser");
+var cors = require("cors");
 
-// create application/json parser
-var jsonParser = bodyParser.json()
+var jsonParser = bodyParser.json();
 
-// create application/x-www-form-urlencoded parser
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+var urlencodeParser = bodyParser.urlencoded({ extended: false });
 
-const port = 3000
+const port = 3001;
 
-app.use(cors())
+app.use(cors());
 app.use(jsonParser);
-app.use(urlencodedParser);
+app.use(urlencodeParser);
 
-app.get('/', (req, res) => {
-  res.json('Hello World!')
-})
+app.get("/", async (req, res) => {
+  const response = await fetch("http://localhost:3000/");
+  const body = await response.text();
 
-app.post('/login', (req, res) => {
-    // Simulasi data dari database
-    const username = 'joko'
-    const password = '12345678'
+  console.log(body);
+  res.json("wesite-b");
+});
 
-    if (req.body.username === username) {
-        if (req.body.password === password) {
-            res.json({
-                status: 'success'
-            })
-        }  else {
-            res.json({
-                status: 'error, wrong password'
-            })
-        }
-    } else {
-        res.json({
-            status: 'error, username not found'
-        })
-    }
-  })
+app.get("/trigger-webhook-event", async (req, res) => {
+  try {
+    const data = {
+      secret: "secret123",
+    };
+
+    const response = await fetch("http://localhost:3000/github-event", {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+    console.log(responseData);
+
+    res.json("sucess");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
 
 app.listen(port, () => {
-  console.log('Example app listening on port ${port}')
-})
+  console.log(`Example app listening on port ${port}`);
+});
